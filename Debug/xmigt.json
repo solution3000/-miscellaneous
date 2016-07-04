@@ -1,0 +1,18 @@
+{
+    "xmigt": {
+        "dimension": "3D",
+        "weight": "no",
+        "restarted": "yes",
+        "tmpdir": "/tmp",
+         
+        "aperture": {
+            "time": [ 100, 2000, 3000, 6000 ],
+            "apert": [ 3000, 4000, 5000, 6000 ],
+            "apmax": 8000
+        },
+        "alias": {
+            "line": 1,
+            "cdp": 1
+        }
+    }
+}

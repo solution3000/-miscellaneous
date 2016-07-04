@@ -1,0 +1,16 @@
+{
+    "input": {
+        "prestk": "yes",
+        "type": "dsk",
+        "files": [
+            "/data1/HLL/1.dsk",
+            "/data1/HLL/2.dsk",
+            "/data1/HLL/3.dsk"
+        ],
+
+        "info": {
+            "format": "ibm",
+            "ns": 10
+        }
+    }
+}
