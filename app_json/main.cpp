@@ -309,6 +309,7 @@ void test_msg(int argc, char **argv)
 			//compute_and_send_buf->nrec=0;
 			//compute_and_send_buf->flags=0;
 
+
 			recv_current = (recv_current + 1) % 2;
 
 			//异步网络接收数据
@@ -329,8 +330,8 @@ void test_msg(int argc, char **argv)
 		
 		if (compute_and_send_buf->count != nnode)
 		{
+			//等待数据发送完成，此处是必须的
 			MPI_Wait(&send_req, &send_status);
-			//wait(&send_req);
 		}
 	}
 	MPI_File_close(&fh);
