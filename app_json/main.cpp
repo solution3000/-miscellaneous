@@ -13,7 +13,7 @@ void test_json()
 {
 	// a JSON text
 	auto text = R"(
-    {
+	  {
         "Image": {
             "Width":  800,
             "Height": 600,
@@ -26,7 +26,7 @@ void test_json()
             "Animated" : false,
             "IDs": [116, 943, 234, 38793]
         }
-    }
+     }
     )";
 
 	// fill a stream with JSON text
@@ -206,136 +206,6 @@ void test()
 	test_velocity();
 	test_checkpoint();
 	test_xmigt();
-}
-
-/*
-测试多个MPI 节点，并发读取一个本地数据，
-本地数据是一个大文件的一部分，期间所有的数据会通过MPI通信，
-在所有节点之间遍历一次(仅遍历一次):
-
-如果有N个节点，相当于有N个硬盘的RAID0, 读盘的同时，网络也在
-交换数据！ 平均IO所用时间：t=O(T/N)， T为一个节点读取整个大文件的时间
-
-通过nonblock IO, 计算会和IO overlapped, IO时间会被掩盖
-
-*/
-
-struct MsgHD
-{
-    uint16_t  flags;
-	uint16_t  count;
-	int nrec;
-	char addr[0];
-};
-
-typedef float rec_t[1024];
-const static int NREC_PER_IO = 1024;
-
-void test_msg(int argc, char **argv)
-{
-	cout << sizeof(MsgHD) << endl;
-
-	size_t msg_len = sizeof(MsgHD) + sizeof(rec_t)*NREC_PER_IO;
-	cout << "msg_len="<< msg_len << endl;
-
-	MsgHD *disk_bufs[2];
-	MsgHD *recv_bufs[2];
-
-	char *buf_base=new char[4*msg_len];
-	disk_bufs[0] = reinterpret_cast<MsgHD*>(buf_base);
-	disk_bufs[1] = reinterpret_cast<MsgHD*>(buf_base+msg_len);
-	recv_bufs[0] = reinterpret_cast<MsgHD*>(buf_base+2*msg_len);
-	recv_bufs[1] = reinterpret_cast<MsgHD*>(buf_base+3*msg_len);
-
-	cout << disk_bufs[0] << endl;
-	cout << disk_bufs[1] << endl;
-	cout << recv_bufs[0] << endl;
-	cout << recv_bufs[1] << endl;
-
-	int disk_current = 0;
-	int recv_current = 0;
-	
-	MsgHD *compute_and_send_buf = 0;
-	MPI_Request reqs[2];
-
-	/*********************************/
-	
-	//初始化工作
-
-	int myid, nnode;
-	int prev, next;
-	MPI_Init(&argc, &argv);
-	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-	MPI_Comm_size(MPI_COMM_WORLD, &nnode);
-	prev = myid - 1;
-	next = myid + 1;
-	
-	prev = (prev + nnode) % nnode;
-	next = next %nnode;
-
-	char *filename = "file.txt";
-	MPI_File fh;
-	MPI_File_open(MPI_COMM_SELF, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-
-	int nbytes = sizeof(rec_t)*NREC_PER_IO;
-	
-	//异步磁盘读数据
-	MPI_File_iread(fh, disk_bufs[disk_current]->addr, nbytes, MPI_BYTE, &reqs[0]);
-	//异步网络接收数据
-	MPI_Irecv(recv_bufs[recv_current], msg_len, MPI_BYTE, prev, MPI_ANY_TAG, MPI_COMM_WORLD, &reqs[1]);
-
-	while (0)
-	{
-		int which=-1;
-		MPI_Status status;
-
-		MPI_Waitany(2, reqs, &which, &status);
-		if (which == 0) //处理磁盘IO
-		{
-			compute_and_send_buf = disk_bufs[disk_current];
-			//compute_and_send_buf->nrec = 0;
-			//compute_and_send_buf->flags=0;
-			//compute_and_send_buf->count=0;
-			disk_current = (disk_current + 1) % 2;
-
-			//异步磁盘读数据
-			MPI_File_iread(fh, disk_bufs[disk_current]->addr, nbytes, MPI_BYTE, &reqs[0]);
-
-		}
-		else if (which == 1) //处理网络数据
-		{
-			compute_and_send_buf = recv_bufs[recv_current];
-			//compute_and_send_buf->count++;
-			//compute_and_send_buf->nrec=0;
-			//compute_and_send_buf->flags=0;
-
-
-			recv_current = (recv_current + 1) % 2;
-
-			//异步网络接收数据
-			MPI_Irecv(recv_bufs[recv_current], msg_len, MPI_BYTE, prev, MPI_ANY_TAG, MPI_COMM_WORLD, &reqs[1]);
-		}
-
-		MPI_Status send_status;
-		MPI_Request send_req;
-		if (compute_and_send_buf->count != nnode)
-		{
-			//异步发送数据给NEXT节点
-			MPI_Isend(compute_and_send_buf, msg_len, MPI_BYTE, next, MPI_ANY_TAG, MPI_COMM_WORLD, &send_req);
-		}
-
-		//调用计算函数
-		//compute(compute_and_send_buf);
-
-		
-		if (compute_and_send_buf->count != nnode)
-		{
-			//等待数据发送完成，此处是必须的
-			MPI_Wait(&send_req, &send_status);
-		}
-	}
-	MPI_File_close(&fh);
-	delete[]buf_base;
 }
 
 int main(int argc, char **argv)
