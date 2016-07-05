@@ -210,7 +210,6 @@ void test()
 
 int main(int argc, char **argv)
 {
-	//test();
-	test_msg(argc, argv);
+	test();
 	return 0;
 }
