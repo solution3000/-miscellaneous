@@ -38,5 +38,7 @@
     <None Include="..\Debug\xmigt.json">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="..\Stage\test.js" />
+    <None Include="..\Stage\testFaceServer.php" />
   </ItemGroup>
 </Project>

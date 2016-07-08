@@ -158,6 +158,8 @@
     <None Include="..\Debug\output.json" />
     <None Include="..\Debug\velocity.json" />
     <None Include="..\Debug\xmigt.json" />
+    <None Include="..\Stage\test.js" />
+    <None Include="..\Stage\testFaceServer.php" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
