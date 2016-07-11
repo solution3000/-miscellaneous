@@ -161,6 +161,7 @@
     <None Include="..\Debug\xmigt.json" />
     <None Include="..\Stage\test.js" />
     <None Include="..\Stage\testFaceServer.php" />
+    <None Include="..\Stage\test_cuda.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -43,5 +43,6 @@
     </None>
     <None Include="..\Stage\test.js" />
     <None Include="..\Stage\testFaceServer.php" />
+    <None Include="..\Stage\test_cuda.cu" />
   </ItemGroup>
 </Project>
